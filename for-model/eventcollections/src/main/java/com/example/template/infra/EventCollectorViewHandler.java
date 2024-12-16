@@ -23,7 +23,7 @@ public class EventCollectorViewHandler {
 
 {{#boundedContexts}}
     {{#each attached}}
-    {{#if (isEvent _type)}}
+    {{#if (isEvent _type name)}}
     @StreamListener(KafkaProcessor.INPUT)
     public void when{{namePascalCase}}_then_CREATE(
         @Payload {{namePascalCase}} {{nameCamelCase}}
@@ -54,8 +54,11 @@ public class EventCollectorViewHandler {
     //>>> DDD / CQRS
 }
 <function>
-window.$HandleBars.registerHelper('isEvent', function (type) {
-    if (type.endsWith("Event")) {
+var eventList = [];
+
+window.$HandleBars.registerHelper('isEvent', function (type, name) {
+    if (type.endsWith("Event") && !eventList.includes(name)) {
+        eventList.push(name);
         return true;
     } else {
         return false;
