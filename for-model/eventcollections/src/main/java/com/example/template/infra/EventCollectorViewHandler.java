@@ -2,6 +2,8 @@ path: /src/main/java/{{options.package}}/infra
 ---
 package {{options.package}}.infra;
 
+import {{options.package}}.config.kafka.KafkaProcessor;
+import {{options.package}}.domain.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -10,8 +12,6 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
-import com.example.template.config.kafka.KafkaProcessor;
-import com.example.template.domain.EventCollector;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -25,7 +25,7 @@ public class EventCollectorViewHandler {
     {{#each attached}}
     {{#if (isEvent _type)}}
     @StreamListener(KafkaProcessor.INPUT)
-    public void when{{namePascalCase}}_then_CREATE_1(
+    public void when{{namePascalCase}}_then_CREATE(
         @Payload {{namePascalCase}} {{nameCamelCase}}
     ) {
         try {
@@ -36,7 +36,7 @@ public class EventCollectorViewHandler {
             // view 객체에 이벤트의 Value 를 set 함
             eventCollector.setType({{nameCamelCase}}.getEventType());
             eventCollector.setCorrelationKey(
-                String.valueOf({{nameCamelCase}}.getId())
+                {{#checkCorrelationKey nameCamelCase fieldDescriptors}}{{/checkCorrelationKey}}
             );
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonPayload = objectMapper.writeValueAsString({{nameCamelCase}});
@@ -59,6 +59,21 @@ window.$HandleBars.registerHelper('isEvent', function (type) {
         return true;
     } else {
         return false;
+    }
+});
+
+window.$HandleBars.registerHelper('checkCorrelationKey', function (eventName, fieldDescriptors) {
+    var text = "";
+    for(var i = 0; i < fieldDescriptors.length; i ++ ){
+        if(fieldDescriptors[i] && fieldDescriptors[i].isCorrelationKey) {
+            const value = eventName + ".get" + fieldDescriptors[i].namePascalCase + "()";
+            if (fieldDescriptors[i].className == "String") {
+                text += value;
+            } else {
+                text += "String.valueOf(" + value + ")"
+            }
+            return text;
+        }
     }
 });
 </function>
