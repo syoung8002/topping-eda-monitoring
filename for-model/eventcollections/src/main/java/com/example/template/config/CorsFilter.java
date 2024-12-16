@@ -32,7 +32,7 @@ public class CorsFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) res;
 
         // CORS 헤더 설정
-        response.setHeader("Access-Control-Allow-Origin", "https://localhost:8081");
+        response.setHeader("Access-Control-Allow-Origin", {{#setOrigin}}{{/setOrigin}});
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
         response.setHeader("Access-Control-Allow-Credentials", "true");
@@ -50,3 +50,10 @@ public class CorsFilter implements Filter {
         // 필터 종료 시 필요한 작업 (필요한 경우 사용)
     }
 }
+
+<function>
+window.$HandleBars.registerHelper('setOrigin', function () {
+    const host = window.location.host;
+    return '"https://' + host + '"';
+});
+</function>

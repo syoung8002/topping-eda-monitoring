@@ -13,9 +13,16 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("https://localhost:8081")
+                .allowedOrigins({{#setOrigin}}{{/setOrigin}})
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
 }
+
+<function>
+window.$HandleBars.registerHelper('setOrigin', function () {
+    const host = window.location.host;
+    return '"https://' + host + '"';
+});
+</function>
