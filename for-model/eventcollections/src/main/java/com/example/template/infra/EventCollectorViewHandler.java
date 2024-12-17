@@ -12,6 +12,7 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
+import com.example.template.config.kafka.KafkaProcessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -42,6 +43,7 @@ public class EventCollectorViewHandler {
             String jsonPayload = objectMapper.writeValueAsString({{nameCamelCase}});
             eventCollector.setPayload(jsonPayload);
             eventCollector.setTimestamp({{nameCamelCase}}.getTimestamp());
+            {{#setSearchKey nameCamelCase fieldDescriptors}}{{/setSearchKey}}
             // view 레파지 토리에 save
             eventCollectorRepository.save(eventCollector);
         } catch (Exception e) {
@@ -53,8 +55,11 @@ public class EventCollectorViewHandler {
 {{/boundedContexts}}
     //>>> DDD / CQRS
 }
+
 <function>
 var eventList = [];
+var searchKeyList = [];
+
 
 window.$HandleBars.registerHelper('isEvent', function (type, name) {
     if (type.endsWith("Event") && !eventList.includes(name)) {
@@ -78,5 +83,17 @@ window.$HandleBars.registerHelper('checkCorrelationKey', function (eventName, fi
             return text;
         }
     }
+});
+
+window.$HandleBars.registerHelper('setSearchKey', function (eventName, fieldDescriptors) {
+    var text = "";
+    for(var i = 0; i < fieldDescriptors.length; i ++ ) {
+        if(fieldDescriptors[i] && fieldDescriptors[i].isSearchKey && !searchKeyList.includes(fieldDescriptors[i].name)) {
+            searchKeyList.push(fieldDescriptors[i].name);
+            const value = eventName + ".get" + fieldDescriptors[i].namePascalCase + "()";
+            text += "eventCollector.set" + fieldDescriptors[i].namePascalCase + "(" + value + ");"
+        }
+    }
+    return text;
 });
 </function>

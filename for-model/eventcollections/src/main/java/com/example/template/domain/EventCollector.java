@@ -24,4 +24,36 @@ public class EventCollector {
     @Lob
     private String payload;
     private Long timestamp;
+{{#boundedContexts}}
+{{#each attached}}
+{{#if (isEvent _type name)}}
+    {{#setSearchKey nameCamelCase fieldDescriptors}}{{/setSearchKey}}
+{{/if}}
+{{/each}}
+{{/boundedContexts}}
 }
+
+<function>
+var eventList = [];
+var searchKeyList = [];
+
+window.$HandleBars.registerHelper('isEvent', function (type, name) {
+    if (type.endsWith("Event") && !eventList.includes(name)) {
+        eventList.push(name);
+        return true;
+    } else {
+        return false;
+    }
+});
+
+window.$HandleBars.registerHelper('setSearchKey', function (fieldDescriptors) {
+    var text = "";
+    for(var i = 0; i < fieldDescriptors.length; i ++ ){
+        if(fieldDescriptors[i] && fieldDescriptors[i].isSearchKey && !searchKeyList.includes(fieldDescriptors[i].name)) {
+            searchKeyList.push(fieldDescriptors[i].name);
+            text += "private " + fieldDescriptors[i].className + " " + fieldDescriptors[i].nameCamelCase + ";"
+        }
+    }
+    return text;
+});
+</function>
