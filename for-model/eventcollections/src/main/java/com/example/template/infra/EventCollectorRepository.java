@@ -26,15 +26,17 @@ public interface EventCollectorRepository
         List<EventCollector> findRecentEvents(@Param("timestamp") Long timestamp);
 {{#boundedContexts}}
 {{#each attached}}
-    {{#if (isEvent _type name)}}
-        {{#setSearchKey fieldDescriptors}}
+{{#if (isEvent _type name)}}
+    {{#fieldDescriptors}}
+        {{#if (isSearchKey isSearchKey name)}}
         @Query("SELECT e FROM EventCollector e WHERE e.correlationKey = :correlationKey OR (:{{nameCamelCase}} IS NOT NULL AND e.{{nameCamelCase}} = :{{nameCamelCase}})")
         List<EventCollector> findBySearchKey(
             @Param("correlationKey") String correlationKey,
             @Param("{{nameCamelCase}}") String {{nameCamelCase}}
         );
-        {{/setSearchKey}}
-    {{/if}}
+        {{/if}}
+    {{/fieldDescriptors}}
+{{/if}}
 {{/each}}
 {{/boundedContexts}}
     }
@@ -52,14 +54,15 @@ window.$HandleBars.registerHelper('isEvent', function (type, name) {
     }
 });
 
-window.$HandleBars.registerHelper('setSearchKey', function (fieldDescriptors) {
-    var result = null;
-    for(var i = 0; i < fieldDescriptors.length; i ++ ){
-        if(fieldDescriptors[i] && fieldDescriptors[i].isSearchKey && !searchKeyList.includes(fieldDescriptors[i].name)) {
-            searchKeyList.push(fieldDescriptors[i].name);
-            result = fieldDescriptors[i];
-        }
+window.$HandleBars.registerHelper('isSearchKey', function (isSearchKey, name) {
+    if(!isSearchKey) {
+        return false;
     }
-    return result;
+    if(isSearchKey && !searchKeyList.includes(name)) {
+        searchKeyList.push(name);
+        return true;
+    } else {
+        return false;
+    }
 });
 </function>
