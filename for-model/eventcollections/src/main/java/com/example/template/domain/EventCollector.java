@@ -27,7 +27,7 @@ public class EventCollector {
 {{#boundedContexts}}
 {{#each attached}}
 {{#if (isEvent _type name)}}
-    {{#setSearchKey nameCamelCase fieldDescriptors}}{{/setSearchKey}}
+    {{#setSearchKey fieldDescriptors}}{{/setSearchKey}}
 {{/if}}
 {{/each}}
 {{/boundedContexts}}
