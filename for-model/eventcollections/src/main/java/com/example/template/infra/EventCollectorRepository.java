@@ -27,13 +27,13 @@ public interface EventCollectorRepository
 {{#boundedContexts}}
 {{#each attached}}
     {{#if (isEvent _type name)}}
-        {{#if (hasSearchKey fieldDescriptors)}}
+        {{#setSearchKey fieldDescriptors}}
         @Query("SELECT e FROM EventCollector e WHERE e.correlationKey = :correlationKey OR (:{{nameCamelCase}} IS NOT NULL AND e.{{nameCamelCase}} = :{{nameCamelCase}})")
         List<EventCollector> findBySearchKey(
             @Param("correlationKey") String correlationKey,
             @Param("{{nameCamelCase}}") String {{nameCamelCase}}
         );
-        {{/if}}
+        {{/setSearchKey}}
     {{/if}}
 {{/each}}
 {{/boundedContexts}}
@@ -52,11 +52,12 @@ window.$HandleBars.registerHelper('isEvent', function (type, name) {
     }
 });
 
-window.$HandleBars.registerHelper('hasSearchKey', function (fieldDescriptors) {
-    var result = false;
+window.$HandleBars.registerHelper('setSearchKey', function (fieldDescriptors) {
+    var result = null;
     for(var i = 0; i < fieldDescriptors.length; i ++ ){
         if(fieldDescriptors[i] && fieldDescriptors[i].isSearchKey && !searchKeyList.includes(fieldDescriptors[i].name)) {
-            result = true;
+            searchKeyList.push(fieldDescriptors[i].name);
+            result = fieldDescriptors[i];
         }
     }
     return result;
