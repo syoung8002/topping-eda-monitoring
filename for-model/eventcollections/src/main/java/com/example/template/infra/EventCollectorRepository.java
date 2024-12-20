@@ -2,16 +2,13 @@ path: /src/main/java/{{options.package}}/infra
 ---
 package {{options.package}}.infra;
 
+import {{options.package}}.domain.*;
 import java.util.List;
-
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-import com.example.template.domain.EventCollector;
-
-import {{options.package}}.domain.*;
 
 @RepositoryRestResource(
     collectionResourceRel = "eventCollectors",
